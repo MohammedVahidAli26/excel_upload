@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Column Concatenation</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: flex;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h4, .sidebar h6 {
+            margin-bottom: 10px;
+        }
+        .sidebar input, .sidebar button {
+            margin-bottom: 15px;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+        }
+        .sidebar button {
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .sidebar button:hover {
+            background: #2980b9;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #34495e;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h4>Upload File</h4>
+        <input type="file" id="fileInput" class="form-control">
+        <h6>Left Side Columns (comma separated)</h6>
+        <input type="text" id="leftHeaders" class="form-control" placeholder="Column1, Column2">
+        <h6>Right Side Columns (comma separated)</h6>
+        <input type="text" id="rightHeaders" class="form-control" placeholder="Column3, Column4">
+        <button onclick="processFile()" class="btn">Submit</button>
+    </div>
+
+    <div class="content">
+        <h2>Concatenated Table</h2>
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Left Side</th>
+                    <th>Right Side</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    
+    <script>
+        function processFile() {
+            const fileInput = document.getElementById('fileInput');
+            const leftHeaders = document.getElementById('leftHeaders').value.split(',');
+            const rightHeaders = document.getElementById('rightHeaders').value.split(',');
+            const tableBody = document.querySelector('#resultTable tbody');
+            
+            if (!fileInput.files.length) {
+                alert('Please upload a file');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const data = event.target.result;
+                console.log('File loaded:', data);
+                alert('File processing simulated. Backend required to process Excel files.');
+            };
+            
+            reader.readAsText(fileInput.files[0]);
+        }
+    </script>
+</body>
+</html>
