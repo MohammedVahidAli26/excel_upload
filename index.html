@@ -98,22 +98,25 @@
             
             const reader = new FileReader();
             reader.onload = function(event) {
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(sheet);
-                
-                tableBody.innerHTML = '';
-                jsonData.forEach(row => {
-                    const leftData = leftHeaders.map(h => row[h] || '').join(' ');
-                    const rightData = rightHeaders.map(h => row[h] || '').join(' ');
-                    
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${leftData}</td><td>${rightData}</td>`;
-                    tableBody.appendChild(tr);
-                });
-            };
-            
+    const data = new Uint8Array(event.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+    console.log("Excel Data:", jsonData); // Debugging
+
+    tableBody.innerHTML = '';
+    jsonData.forEach(row => {
+        console.log("Row Data:", row); // Debugging each row
+        const leftData = leftHeaders.map(h => row[h] || '[Not Found]').join(' ');
+        const rightData = rightHeaders.map(h => row[h] || '[Not Found]').join(' ');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${leftData}</td><td>${rightData}</td>`;
+        tableBody.appendChild(tr);
+    });
+};
+
             reader.readAsArrayBuffer(fileInput.files[0]);
         }
     </script>
