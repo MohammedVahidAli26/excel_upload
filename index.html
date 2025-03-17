@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Column Concatenation</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             display: flex;
@@ -86,8 +87,8 @@
     <script>
         function processFile() {
             const fileInput = document.getElementById('fileInput');
-            const leftHeaders = document.getElementById('leftHeaders').value.split(',');
-            const rightHeaders = document.getElementById('rightHeaders').value.split(',');
+            const leftHeaders = document.getElementById('leftHeaders').value.split(',').map(h => h.trim());
+            const rightHeaders = document.getElementById('rightHeaders').value.split(',').map(h => h.trim());
             const tableBody = document.querySelector('#resultTable tbody');
             
             if (!fileInput.files.length) {
@@ -97,12 +98,23 @@
             
             const reader = new FileReader();
             reader.onload = function(event) {
-                const data = event.target.result;
-                console.log('File loaded:', data);
-                alert('File processing simulated. Backend required to process Excel files.');
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(sheet);
+                
+                tableBody.innerHTML = '';
+                jsonData.forEach(row => {
+                    const leftData = leftHeaders.map(h => row[h] || '').join(' ');
+                    const rightData = rightHeaders.map(h => row[h] || '').join(' ');
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${leftData}</td><td>${rightData}</td>`;
+                    tableBody.appendChild(tr);
+                });
             };
             
-            reader.readAsText(fileInput.files[0]);
+            reader.readAsArrayBuffer(fileInput.files[0]);
         }
     </script>
 </body>
