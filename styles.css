@@ -1,0 +1,112 @@
+body {
+    display: flex;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    height: 100vh;
+    background-color: #f4f6f9;
+    color: #333;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 15%;
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+.sidebar h4, .sidebar h6 {
+    margin-bottom: 10px;
+}
+.sidebar input {
+    padding: 8px;
+    margin-bottom: 12px;
+    border-radius: 5px;
+}
+.sidebar button {
+    padding: 10px;
+    background: #1abc9c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+}
+.sidebar button:hover {
+    background: #16a085;
+}
+
+/* Content Area */
+.content {
+    width: 85%;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Loader */
+.loader {
+    display: none;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Card Layout */
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 600px;
+    border-left: 5px solid #3498db;
+    transition: transform 0.2s;
+}
+
+.card-header {
+    background: #3498db;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+    border-radius: 5px 5px 0 0;
+    text-align: center;
+    font-size: 18px;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+/* Two-column layout */
+.data-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.data-label {
+    font-weight: bold;
+    background: #ecf0f1;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.data-value {
+    padding: 8px;
+    border-radius: 4px;
+    background: #fdfdfd;
+    border: 1px solid #ddd;
+}
