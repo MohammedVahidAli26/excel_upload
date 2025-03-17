@@ -58,6 +58,19 @@
             background: #34495e;
             color: white;
         }
+        .header-row {
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .sub-header {
+            background-color: #838996;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -75,7 +88,7 @@
         <h2>Concatenated Table</h2>
         <table id="resultTable">
             <thead>
-                <tr id="tableHeaders"></tr>
+                <tr class="header-row"><td colspan="2">Data Table</td></tr>
             </thead>
             <tbody></tbody>
         </table>
@@ -86,7 +99,6 @@
             const fileInput = document.getElementById('fileInput');
             const leftHeaders = document.getElementById('leftHeaders').value.split(',').map(h => h.trim());
             const rightHeaders = document.getElementById('rightHeaders').value.split(',').map(h => h.trim());
-            const tableHead = document.getElementById('tableHeaders');
             const tableBody = document.querySelector('#resultTable tbody');
             
             if (!fileInput.files.length) {
@@ -101,15 +113,15 @@
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(sheet);
                 
-                tableHead.innerHTML = `<th>${leftHeaders.join(' + ')}</th><th>${rightHeaders.join(' + ')}</th>`;
                 tableBody.innerHTML = '';
-                jsonData.forEach(row => {
-                    const leftData = leftHeaders.map(h => row[h] || '').join(' ');
-                    const rightData = rightHeaders.map(h => row[h] || '').join(' ');
-                    
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${leftData}</td><td>${rightData}</td>`;
-                    tableBody.appendChild(tr);
+                jsonData.forEach((row, index) => {
+                    tableBody.innerHTML += `<tr class='header-row'><td colspan='2'>Item No: ${index + 1}</td></tr>`;
+                    tableBody.innerHTML += `<tr class='sub-header'><td>Tenant PN</td><td>Source PN</td></tr>`;
+                    tableBody.innerHTML += `<tr><td>${leftHeaders.map(h => row[h] || '').join(' ')}</td><td>${rightHeaders.map(h => row[h] || '').join(' ')}</td></tr>`;
+                    tableBody.innerHTML += `<tr class='sub-header'><td>Tenant SD</td><td>Source SD</td></tr>`;
+                    tableBody.innerHTML += `<tr><td>${leftHeaders.map(h => row[h] || '').join(' ')}</td><td>${rightHeaders.map(h => row[h] || '').join(' ')}</td></tr>`;
+                    tableBody.innerHTML += `<tr class='sub-header'><td>Tenant LD</td><td>Source LD</td></tr>`;
+                    tableBody.innerHTML += `<tr><td>${leftHeaders.map(h => row[h] || '').join(' ')}</td><td>${rightHeaders.map(h => row[h] || '').join(' ')}</td></tr>`;
                 });
             };
             
