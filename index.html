@@ -147,12 +147,12 @@ button:hover {
 
 
         .content {
-            width: 85%;
+            width: 80%;
             padding: 20px;
             overflow: hidden;
         }
         .html-viewer {
-            height: 100vh;
+            height: 90vh;
             overflow-y: auto;
             border: 1px solid #444;
             display: flex;
@@ -172,12 +172,16 @@ button:hover {
             background: #2c3e50;
             text-align: center;
         }
-        .highlight { background-color: yellow; color: black; font-weight: bold; }
-        .unmatched { background-color: red; color: white; font-weight: bold; }
-        .select2-container--default .select2-selection--multiple {
-            background: #444;
-            color: white;
-            border: 1px solid #666;
+        .header-row {
+            background-color: #3498db;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: left;
+        }
+        .sub-header {
+            background-color: #555;
+            text-align: center;
+            font-weight: bold;
         }
        
         .highlight {
@@ -206,6 +210,15 @@ button:hover {
 #toggleHighlightBtn:hover {
     background: #666666;
 }
+img {
+    max-width: 100px;  /* Adjust this value as needed */
+    max-height: 100px; /* Adjust this value as needed */
+    width: auto;
+    height: auto;
+    display: block;
+    margin: auto;
+}
+
 
 
     </style>
@@ -254,7 +267,6 @@ button:hover {
     </div>
     
     <script>
-        
         let rowInfoDropdown, leftHeadersDropdown, rightHeadersDropdown;
 
         function loadHeaders() {
@@ -308,8 +320,7 @@ button:hover {
             if (selectId === 'leftHeadersSelect') leftHeadersDropdown = dropdown;
             if (selectId === 'rightHeadersSelect') rightHeadersDropdown = dropdown;
         }
-
-       function processFile() {
+        function processFile() {
     const fileInput = document.getElementById('fileInput');
     const tableBody = document.querySelector('#resultTable tbody');
 
@@ -353,14 +364,21 @@ button:hover {
             let rowHTML = `<tr class='header-row'><td colspan='2'>${rowInfoContent}</td></tr>`;
 
             if (leftHeaders.length === 1 && rightHeaders.length === 0) {
-                // Case: Only one column is selected
+                // Case: Only one column selected
                 const columnIndex = headers.indexOf(leftHeaders[0]);
                 if (columnIndex !== -1) {
+                    let cellValue = row[columnIndex] || '';
+
+                    // Check if the value is an image URL
+                    let cellContent = isImageUrl(cellValue)
+                        ? `<img src="${cellValue}" alt="Image" style="max-width:100px; max-height:100px;">`
+                        : cellValue;
+
                     rowHTML += `<tr class='sub-header'><td colspan="2">${headers[columnIndex]}</td></tr>`;
-                    rowHTML += `<tr class='data-row'><td colspan="2">${row[columnIndex] || ''}</td></tr>`;
+                    rowHTML += `<tr class='data-row'><td colspan="2">${cellContent}</td></tr>`;
                 }
             } else {
-                // Case: Multiple columns selected (default left-right pair display)
+                // Case: Multiple columns selected
                 for (let i = 0; i < leftHeaders.length; i++) {
                     const leftColumnIndex = headers.indexOf(leftHeaders[i]);
                     const rightColumnIndex = headers.indexOf(rightHeaders[i]);
@@ -369,8 +387,16 @@ button:hover {
                         let leftValue = row[leftColumnIndex] || '';
                         let rightValue = rightColumnIndex !== -1 ? row[rightColumnIndex] || '' : '';
 
+                        let leftContent = isImageUrl(leftValue)
+                            ? `<img src="${leftValue}" alt="Image" style="max-width:100px; max-height:100px;">`
+                            : leftValue;
+
+                        let rightContent = isImageUrl(rightValue)
+                            ? `<img src="${rightValue}" alt="Image" style="max-width:100px; max-height:100px;">`
+                            : rightValue;
+
                         rowHTML += `<tr class='sub-header'><td>${headers[leftColumnIndex]}</td><td>${rightHeaders[i] || ''}</td></tr>`;
-                        rowHTML += `<tr class='data-row'><td>${leftValue}</td><td>${rightValue}</td></tr>`;
+                        rowHTML += `<tr class='data-row'><td>${leftContent}</td><td>${rightContent}</td></tr>`;
                     }
                 }
             }
@@ -381,6 +407,16 @@ button:hover {
 
     reader.readAsArrayBuffer(fileInput.files[0]);
 }
+
+// Helper function to check if a string is an image URL
+function isImageUrl(url) {
+            if (typeof url === 'string' && url.match(/\.(jpeg|jpg|png|gif|bmp|webp)$/i)) {
+                const img = document.createElement('img');
+                img.src = url;
+                return img;
+            }
+            return null;
+        }
 
 function getSelectedOptions(selectId) {
     const select = document.getElementById(selectId);
