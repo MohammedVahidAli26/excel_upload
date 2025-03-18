@@ -7,7 +7,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+
     <style>
+        .loader-container {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .loading-text {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+        }
         body {
             display: flex;
             font-family: Arial, sans-serif;
@@ -218,12 +236,21 @@ img {
     display: block;
     margin: auto;
 }
-
+.lottie-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            z-index: 1000;
+        }
 
 
     </style>
 </head>
 <body>
+    <div id="lottie-animation" class="lottie-container"></div>
+
     <div class="sidebar">
         <div class="sidebar-section">
             <h4>Upload File</h4>
@@ -266,7 +293,13 @@ img {
         </div>
     </div>
     
-    <script>
+    <script> lottie.loadAnimation({
+        container: document.getElementById("lottie-animation"),
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        path: "gif/load1.json" // Replace with your Lottie JSON file path
+    });
         let rowInfoDropdown, leftHeadersDropdown, rightHeadersDropdown;
 
         function loadHeaders() {
@@ -482,5 +515,7 @@ function removeHighlights() {
 
 
     </script>
+    
 </body>
+
 </html>
