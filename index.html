@@ -5,34 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Column Viewer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.css">
     <style>
         body {
             display: flex;
             font-family: Arial, sans-serif;
             margin: 0;
             height: 100vh;
-            overflow: hidden;
             background: #1e1e1e;
             color: #ffffff;
         }
-        .sidebar {
-            width: 15%;
-            background: #252526;
-            color: white;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            overflow-y: auto;
-            max-height: 100vh;
-        }
+
+        
+    .sidebar {
+    width: 260px;
+    background: #222222; /* Dark but not too fancy */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-right: 3px solid #bbbbbb;
+    max-height: 100vh;
+    overflow-y: auto;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+    
+    background: #2e2e2e;
+    padding: 15px;
+    border-radius: 8px;
+    color: black;
+    border: 1px solid #444444;
+}
+
+/* Sidebar Heading */
+.sidebar h4, .sidebar h6 {
+    margin: 0;
+    padding-bottom: 10px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #ffffff;
+    text-transform: uppercase;
+    border-bottom: 2px solid #bbbbbb;
+}
+
+/* File Input */
+.file-upload {
+    margin-top: 10px;
+    display: block;
+    width: 90%;
+    background: #333333;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #bbbbbb;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.file-upload:hover {
+    background: #444444;
+}
+
+/* Select Dropdown */
+select {
+    margin-top: 10px;
+    overflow-y: scroll;
+    width: 100%;
+    color: #ffffff;
+    background: #3a3a3a;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #000000;
+    font-size: 0.9em;
+}
+/* Ensure the select field maintains the dark background even when focused */
+.choices__inner {
+    background-color: #3a3a3a !important; /* Match the select field background */
+    color: #ffffff !important; /* Keep text white */
+    border: 1px solid #000000;
+}
+
+/* Remove the white highlight on focus */
+.choices[data-type*="select-one"] .choices__inner {
+    background-color: #3a3a3a !important;
+}
+
+/* Keep the dropdown consistent */
+.choices__list--dropdown, 
+.choices__list[aria-expanded] {
+    background-color: #3a3a3a !important;
+    color: #ffffff !important;
+    border: 1px solid #444444;
+}
+/* Remove hover effect on the remove (X) button */
+.choices__button:hover {
+    background: transparent !important;
+    color: inherit !important;
+    border: none !important;
+}
+
+
+
+
+
+/* Buttons */
+button {
+    width: 100%;
+    background: #444444;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 1em;
+    text-transform: uppercase;
+}
+
+button:hover {
+    background: #666666;
+}
+
+/* Custom Scrollbar */
+.sidebar::-webkit-scrollbar {
+    width: 0px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #777777;
+    border-radius: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #999999;
+}
+
+
         .content {
-            width: 85%;
+            width: 80%;
             padding: 20px;
-            position: relative;
             overflow: hidden;
         }
         .html-viewer {
@@ -44,7 +160,6 @@
         }
         table {
             width: 100%;
-            text-align: left;
             border-collapse: collapse;
             background: #2c2c2c;
         }
@@ -57,50 +172,83 @@
             background: #2c3e50;
             text-align: center;
         }
-        .highlight { background-color: yellow; color: black; font-weight: bold; }
-        .unmatched { background-color: red; color: white; font-weight: bold; }
-        .select2-container--default .select2-selection--multiple {
-            background: #444;
-            color: white;
-            border: 1px solid #666;
+        .header-row {
+            background-color: #3498db;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: left;
         }
-        .select2-dropdown {
-            background: #333 !important;
-            color: white !important;
+        .sub-header {
+            background-color: #555;
+            text-align: center;
+            font-weight: bold;
         }
-        .select2-results__option {
-            color: white !important;
-        }
-        .scrollable-nav {
-            overflow-x: auto;
-            white-space: nowrap;
-        }
+       
+        .highlight {
+    background-color: yellow;
+    color: black;
+    font-weight: bold;
+    padding: 2px;
+    border-radius: 3px;
+}
+.highlight {
+    background-color: yellow;
+    color: black;
+    font-weight: bold;
+}
+
+#toggleHighlightBtn {
+    background: #444444;
+    border: none;
+    padding: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: white;
+    border-radius: 6px;
+}
+
+#toggleHighlightBtn:hover {
+    background: #666666;
+}
+
+
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h4>Upload File</h4>
-        <input type="file" id="fileInput">
+        <div class="sidebar-section">
+            <h4>Upload File</h4>
+            <input type="file" id="fileInput" class="file-upload" onchange="loadHeaders()">
+        </div>
+    
+        <div class="sidebar-section">
+            <h6>Additional Row Info</h6>
+            <select id="rowInfoSelect" multiple></select>
+        </div>
+    
+        <div class="sidebar-section">
+            <h6>Left Side Columns</h6>
+            <select id="leftHeadersSelect" multiple></select>
+        </div>
+    
+        <div class="sidebar-section">
+            <h6>Right Side Columns</h6>
+            <select id="rightHeadersSelect" multiple></select>
+        </div>
+    
+        <div class="sidebar-section">
+            <button onclick="processFile()">Submit</button>
+        </div>
+        <div class="sidebar-section">
+            <h6>Find Words</h6>
+            <input type="text" id="wordSearch" placeholder="Enter words to find" class="file-upload">
+        </div>
         
-        <h6>Additional Row Info</h6>
-        <select id="rowInfo" multiple="multiple" style="width: 100%;"></select>
         
-        <h6>Left Side Columns</h6>
-        <select id="leftHeaders" multiple="multiple" style="width: 100%;"></select>
         
-        <h6>Right Side Columns</h6>
-        <select id="rightHeaders" multiple="multiple" style="width: 100%;"></select>
         
-        <h6>Highlight Words</h6>
-        <input type="text" id="highlightWords" placeholder="Word1, Word2">
-        <button onclick="highlightSearch()">Search</button>
-
-        <h6>Highlight Unmatched Words</h6>
-        <input type="checkbox" id="highlightToggle" onchange="highlightUnmatchedWords(this.checked)">
-        
-        <button onclick="displayData()">Submit</button>
     </div>
-
+    
     <div class="content">
         <div class="html-viewer">
             <table id="resultTable">
@@ -110,63 +258,197 @@
     </div>
     
     <script>
-        let jsonData = [];
-        let headers = [];
+        
+        let rowInfoDropdown, leftHeadersDropdown, rightHeadersDropdown;
 
-        document.getElementById('fileInput').addEventListener('change', function() {
-            const file = this.files[0];
-            if (!file) return;
+        function loadHeaders() {
+            const fileInput = document.getElementById('fileInput');
+
+            if (!fileInput.files.length) {
+                alert('Please upload a file');
+                return;
+            }
+
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                headers = jsonData[0];
-                populateDropdowns(headers);
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                if (!jsonData.length) {
+                    alert('Empty file or incorrect format!');
+                    return;
+                }
+
+                const headers = jsonData[0];
+
+                populateDropdown('rowInfoSelect', headers, rowInfoDropdown);
+                populateDropdown('leftHeadersSelect', headers, leftHeadersDropdown);
+                populateDropdown('rightHeadersSelect', headers, rightHeadersDropdown);
             };
-            reader.readAsArrayBuffer(file);
+
+            reader.readAsArrayBuffer(fileInput.files[0]);
+        }
+
+        function populateDropdown(selectId, headers, dropdown) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+
+            headers.forEach(header => {
+                let option = document.createElement('option');
+                option.value = header;
+                option.textContent = header;
+                select.appendChild(option);
+            });
+
+            if (dropdown) {
+                dropdown.destroy();
+            }
+            
+            dropdown = new Choices(select, { removeItemButton: true });
+            
+            if (selectId === 'rowInfoSelect') rowInfoDropdown = dropdown;
+            if (selectId === 'leftHeadersSelect') leftHeadersDropdown = dropdown;
+            if (selectId === 'rightHeadersSelect') rightHeadersDropdown = dropdown;
+        }
+
+       function processFile() {
+    const fileInput = document.getElementById('fileInput');
+    const tableBody = document.querySelector('#resultTable tbody');
+
+    if (!fileInput.files.length) {
+        alert('Please upload a file');
+        return;
+    }
+
+    tableBody.innerHTML = '';
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        if (!jsonData.length) {
+            alert('Empty file or incorrect format!');
+            return;
+        }
+
+        const headers = jsonData[0];
+        const rows = jsonData.slice(1);
+
+        const rowInfoHeaders = getSelectedOptions('rowInfoSelect');
+        const leftHeaders = getSelectedOptions('leftHeadersSelect');
+        const rightHeaders = getSelectedOptions('rightHeadersSelect');
+
+        rows.forEach((row, index) => {
+            let rowNumber = index + 2;
+            let rowInfoContent = `<strong>Row No: ${rowNumber} | </strong>&nbsp;&nbsp;`;
+
+            rowInfoHeaders.forEach(header => {
+                const columnIndex = headers.indexOf(header);
+                if (columnIndex !== -1) {
+                    rowInfoContent += `${header}: ${row[columnIndex] || 'N/A'}&nbsp;&nbsp;`;
+                }
+            });
+
+            let rowHTML = `<tr class='header-row'><td colspan='2'>${rowInfoContent}</td></tr>`;
+
+            if (leftHeaders.length === 1 && rightHeaders.length === 0) {
+                // Case: Only one column is selected
+                const columnIndex = headers.indexOf(leftHeaders[0]);
+                if (columnIndex !== -1) {
+                    rowHTML += `<tr class='sub-header'><td colspan="2">${headers[columnIndex]}</td></tr>`;
+                    rowHTML += `<tr class='data-row'><td colspan="2">${row[columnIndex] || ''}</td></tr>`;
+                }
+            } else {
+                // Case: Multiple columns selected (default left-right pair display)
+                for (let i = 0; i < leftHeaders.length; i++) {
+                    const leftColumnIndex = headers.indexOf(leftHeaders[i]);
+                    const rightColumnIndex = headers.indexOf(rightHeaders[i]);
+
+                    if (leftColumnIndex !== -1) {
+                        let leftValue = row[leftColumnIndex] || '';
+                        let rightValue = rightColumnIndex !== -1 ? row[rightColumnIndex] || '' : '';
+
+                        rowHTML += `<tr class='sub-header'><td>${headers[leftColumnIndex]}</td><td>${rightHeaders[i] || ''}</td></tr>`;
+                        rowHTML += `<tr class='data-row'><td>${leftValue}</td><td>${rightValue}</td></tr>`;
+                    }
+                }
+            }
+
+            tableBody.innerHTML += rowHTML;
+        });
+    };
+
+    reader.readAsArrayBuffer(fileInput.files[0]);
+}
+
+function getSelectedOptions(selectId) {
+    const select = document.getElementById(selectId);
+    return Array.from(select.selectedOptions).map(option => option.value);
+}
+
+document.getElementById('wordSearch').addEventListener('input', function () {
+    let searchTerms = this.value.split(',').map(term => term.trim()).filter(term => term !== '');
+    let table = document.getElementById('resultTable');
+
+    // Remove existing highlights
+    table.querySelectorAll('.highlight').forEach(el => {
+        el.outerHTML = el.innerText;
+    });
+
+    if (searchTerms.length === 0) return;
+
+    table.querySelectorAll('td').forEach(td => {
+        let text = td.innerText;
+        let modifiedText = text;
+
+        searchTerms.forEach(term => {
+            if (!term) return;
+
+            let regex;
+            if (/\s/.test(this.value)) { // If input contains spaces, use exact match
+                regex = new RegExp(`\\b${term}\\b`, 'gi'); // Word boundaries for exact match
+            } else { // Otherwise, allow partial matches
+                regex = new RegExp(term, 'gi');
+            }
+
+            modifiedText = modifiedText.replace(regex, '<span class="highlight">$&</span>');
         });
 
-        function populateDropdowns(headers) {
-            const selects = ['#rowInfo', '#leftHeaders', '#rightHeaders'];
-            selects.forEach(id => {
-                const select = $(id);
-                select.empty();
-                headers.forEach(header => {
-                    select.append(new Option(header, header));
-                });
-                select.select2();
-            });
-        }
+        td.innerHTML = modifiedText;
+    });
+});
+let highlightEnabled = false;
 
-        function displayData() {
-            const rowInfoHeaders = $('#rowInfo').val();
-            const leftHeaders = $('#leftHeaders').val();
-            const rightHeaders = $('#rightHeaders').val();
-            const tableBody = document.querySelector('#resultTable tbody');
-            tableBody.innerHTML = '';
+function toggleHighlight() {
+    highlightEnabled = !highlightEnabled; // Toggle state
 
-            jsonData.slice(1).forEach((row, index) => {
-                let rowHTML = `<tr class='header-row'><td colspan='2'><strong>Row ${index + 2}</strong></td></tr>`;
-                rowInfoHeaders.forEach(header => {
-                    let idx = headers.indexOf(header);
-                    rowHTML += `<tr><td colspan='2'>${header}: ${row[idx] || 'N/A'}</td></tr>`;
-                });
-                leftHeaders.forEach((header, idx) => {
-                    let leftIdx = headers.indexOf(header);
-                    let rightIdx = headers.indexOf(rightHeaders[idx]);
-                    if (leftIdx !== -1 && rightIdx !== -1) {
-                        let leftValue = row[leftIdx] || '';
-                        let rightValue = row[rightIdx] || '';
-                        let unmatchedClass = leftValue !== rightValue ? 'unmatched' : '';
-                        rowHTML += `<tr class='sub-header'><td>${header}</td><td>${rightHeaders[idx]}</td></tr>`;
-                        rowHTML += `<tr class='data-row ${unmatchedClass}'><td>${leftValue}</td><td>${rightValue}</td></tr>`;
-                    }
-                });
-                tableBody.innerHTML += rowHTML;
-            });
-        }
+    let button = document.getElementById('toggleHighlightBtn');
+    let icon = document.getElementById('highlightIcon');
+    
+    icon.textContent = highlightEnabled ? "❌" : "🔍"; // Change icon
+
+    if (highlightEnabled) {
+        highlightUnmatched();
+    } else {
+        removeHighlights();
+    }
+}
+
+function removeHighlights() {
+    let table = document.getElementById('resultTable');
+    table.querySelectorAll('td').forEach(cell => {
+        cell.innerHTML = cell.innerText; // Reset to original text
+    });
+}
+
+
+
+
     </script>
 </body>
 </html>
