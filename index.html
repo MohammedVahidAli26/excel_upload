@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel Column Concatenation</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Excel Column Viewer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         body {
             display: flex;
@@ -17,23 +19,25 @@
             color: #ffffff;
         }
         .sidebar {
-            width: 10%;
+            width: 15%;
             background: #252526;
             color: white;
             padding: 20px;
             display: flex;
             flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 100vh;
         }
         .content {
-            width: 100%;
+            width: 85%;
             padding: 20px;
             position: relative;
             overflow: hidden;
         }
         .html-viewer {
-            height: 100vh;
+            height: 90vh;
             overflow-y: auto;
-            overflow-x: hidden;
             border: 1px solid #444;
             display: flex;
             justify-content: center;
@@ -42,73 +46,62 @@
             width: 100%;
             text-align: left;
             border-collapse: collapse;
-            table-layout: fixed;
-            word-wrap: break-word;
+            background: #2c2c2c;
         }
         th, td {
             border: 1px solid #444;
             padding: 12px;
-            word-break: break-word;
-            white-space: pre-wrap;
+            color: #ffffff;
         }
         th {
             background: #2c3e50;
-            color: white;
             text-align: center;
         }
-        .header-row {
-            background-color: #3498db;
+        .highlight { background-color: yellow; color: black; font-weight: bold; }
+        .unmatched { background-color: red; color: white; font-weight: bold; }
+        .select2-container--default .select2-selection--multiple {
+            background: #444;
             color: white;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: left;
-            padding: 15px;
-            margin-bottom: 10px;
+            border: 1px solid #666;
         }
-        .sub-header {
-            background-color: #555;
-            color: white;
-            text-align: center;
-            font-weight: bold;
+        .select2-dropdown {
+            background: #333 !important;
+            color: white !important;
         }
-        .data-row td {
-            text-align: left;
-            padding: 15px;
+        .select2-results__option {
+            color: white !important;
         }
-        tr {
-            margin-bottom: 15px;
-        }
-        .loader {
-            display: none;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .scrollable-nav {
+            overflow-x: auto;
+            white-space: nowrap;
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h4>Upload File</h4>
-        <input type="file" id="fileInput" class="form-control">
+        <input type="file" id="fileInput">
+        
         <h6>Additional Row Info</h6>
-        <input type="text" id="rowInfo" class="form-control" placeholder="Enter additional row details">
-        <h6>Left Side Columns (comma separated)</h6>
-        <input type="text" id="leftHeaders" class="form-control" placeholder="Column1, Column2">
-        <h6>Right Side Columns (comma separated)</h6>
-        <input type="text" id="rightHeaders" class="form-control" placeholder="Column3, Column4">
-        <button onclick="processFile()" class="btn">Submit</button>
+        <select id="rowInfo" multiple="multiple" style="width: 100%;"></select>
+        
+        <h6>Left Side Columns</h6>
+        <select id="leftHeaders" multiple="multiple" style="width: 100%;"></select>
+        
+        <h6>Right Side Columns</h6>
+        <select id="rightHeaders" multiple="multiple" style="width: 100%;"></select>
+        
+        <h6>Highlight Words</h6>
+        <input type="text" id="highlightWords" placeholder="Word1, Word2">
+        <button onclick="highlightSearch()">Search</button>
+
+        <h6>Highlight Unmatched Words</h6>
+        <input type="checkbox" id="highlightToggle" onchange="highlightUnmatchedWords(this.checked)">
+        
+        <button onclick="displayData()">Submit</button>
     </div>
 
     <div class="content">
-        <div class="loader" id="loader"></div>
         <div class="html-viewer">
             <table id="resultTable">
                 <tbody></tbody>
@@ -117,64 +110,62 @@
     </div>
     
     <script>
-        function processFile() {
-            const fileInput = document.getElementById('fileInput');
-            const rowInfoHeaders = document.getElementById('rowInfo').value.split(',').map(h => h.trim());
-            const leftHeaders = document.getElementById('leftHeaders').value.split(',').map(h => h.trim());
-            const rightHeaders = document.getElementById('rightHeaders').value.split(',').map(h => h.trim());
-            const tableBody = document.querySelector('#resultTable tbody');
-            const loader = document.getElementById('loader');
+        let jsonData = [];
+        let headers = [];
 
-            if (!fileInput.files.length) {
-                alert('Please upload a file');
-                return;
-            }
-
-            loader.style.display = 'block';
-            tableBody.innerHTML = '';
-
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-                const headers = jsonData[0];
-                const rows = jsonData.slice(1);
-
-                rows.forEach((row, index) => {
-                    let rowNumber = index + 2;
-                    let rowInfoContent = `<strong>Row No: ${rowNumber} | </strong>&nbsp;&nbsp;`;
-
-                    rowInfoHeaders.forEach(header => {
-                        const columnIndex = headers.indexOf(header);
-                        if (columnIndex !== -1) {
-                            rowInfoContent += `${header}: ${row[columnIndex] || 'N/A'}&nbsp;&nbsp;`;
-                        }
-                    });
-
-                    let rowHTML = `<tr class='header-row'><td colspan='2'>${rowInfoContent}</td></tr>`;
-
-                    for (let i = 0; i < leftHeaders.length; i++) {
-                        const leftColumnIndex = headers.indexOf(leftHeaders[i]);
-                        const rightColumnIndex = headers.indexOf(rightHeaders[i]);
-
-                        if (leftColumnIndex !== -1 && rightColumnIndex !== -1) {
-                            rowHTML += `<tr class='sub-header'><td>${headers[leftColumnIndex]}</td><td>${headers[rightColumnIndex]}</td></tr>`;
-                            rowHTML += `<tr class='data-row'><td>${row[leftColumnIndex] || ''}</td><td>${row[rightColumnIndex] || ''}</td></tr>`;
-                        }
-                    }
-
-                    tableBody.innerHTML += rowHTML;
-                });
-
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                }, 500);
+                jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                headers = jsonData[0];
+                populateDropdowns(headers);
             };
+            reader.readAsArrayBuffer(file);
+        });
 
-            reader.readAsArrayBuffer(fileInput.files[0]);
+        function populateDropdowns(headers) {
+            const selects = ['#rowInfo', '#leftHeaders', '#rightHeaders'];
+            selects.forEach(id => {
+                const select = $(id);
+                select.empty();
+                headers.forEach(header => {
+                    select.append(new Option(header, header));
+                });
+                select.select2();
+            });
+        }
+
+        function displayData() {
+            const rowInfoHeaders = $('#rowInfo').val();
+            const leftHeaders = $('#leftHeaders').val();
+            const rightHeaders = $('#rightHeaders').val();
+            const tableBody = document.querySelector('#resultTable tbody');
+            tableBody.innerHTML = '';
+
+            jsonData.slice(1).forEach((row, index) => {
+                let rowHTML = `<tr class='header-row'><td colspan='2'><strong>Row ${index + 2}</strong></td></tr>`;
+                rowInfoHeaders.forEach(header => {
+                    let idx = headers.indexOf(header);
+                    rowHTML += `<tr><td colspan='2'>${header}: ${row[idx] || 'N/A'}</td></tr>`;
+                });
+                leftHeaders.forEach((header, idx) => {
+                    let leftIdx = headers.indexOf(header);
+                    let rightIdx = headers.indexOf(rightHeaders[idx]);
+                    if (leftIdx !== -1 && rightIdx !== -1) {
+                        let leftValue = row[leftIdx] || '';
+                        let rightValue = row[rightIdx] || '';
+                        let unmatchedClass = leftValue !== rightValue ? 'unmatched' : '';
+                        rowHTML += `<tr class='sub-header'><td>${header}</td><td>${rightHeaders[idx]}</td></tr>`;
+                        rowHTML += `<tr class='data-row ${unmatchedClass}'><td>${leftValue}</td><td>${rightValue}</td></tr>`;
+                    }
+                });
+                tableBody.innerHTML += rowHTML;
+            });
         }
     </script>
 </body>
