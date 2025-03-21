@@ -421,11 +421,11 @@ img {
                         let rightValue = rightColumnIndex !== -1 ? row[rightColumnIndex] || '' : '';
 
                         let leftContent = isImageUrl(leftValue)
-                            ? `<img src="${leftValue}" alt="Image" style="max-width:100px; max-height:100px;">`
+                            ? `<img src="${leftValue}" alt="Image" style="max-width:500px; max-height:500px;">`
                             : leftValue;
 
                         let rightContent = isImageUrl(rightValue)
-                            ? `<img src="${rightValue}" alt="Image" style="max-width:100px; max-height:100px;">`
+                            ? `<img src="${rightValue}" alt="Image" style="max-width:500px; max-height:500px;">`
                             : rightValue;
 
                         rowHTML += `<tr class='sub-header'><td>${headers[leftColumnIndex]}</td><td>${rightHeaders[i] || ''}</td></tr>`;
